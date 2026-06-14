@@ -356,8 +356,10 @@
 
     .rbv.score { font-family: var(--serif); font-size: 2.6rem; font-weight: 700; line-height: 1; }
     .score-lvl { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; color: rgba(255,255,255,0.6); }
-    .sbar-wrap { height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; margin-top: 12px; overflow: hidden; }
-    .sbar { height: 100%; background: #fff; border-radius: 2px; transition: width 1.4s cubic-bezier(.22,1,.36,1); }
+    .sbar-wrap { height: 8px; background: rgba(255,255,255,0.15); border-radius: 4px; margin-top: 14px; overflow: hidden; }
+    .sbar { height: 100%; background: linear-gradient(90deg, #4ade80 0%, #facc15 40%, #f87171 70%); border-radius: 4px; transition: width 1.4s cubic-bezier(.22,1,.36,1); }
+    .sbar-labels { display: flex; justify-content: space-between; margin-top: 5px; }
+    .sbar-label { font-size: 0.55rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
 
     .tagrow { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
     .rtag { font-size: 0.68rem; font-weight: 500; padding: 3px 9px; border-radius: 6px; border: 1px solid var(--border); color: var(--muted); background: var(--card); }
@@ -834,7 +836,39 @@
         </div>
       </div>
 
+      <!-- Risk band legend -->
       <div class="howto-cov">
+        <div class="hcov-lbl">Regulatory Risk Score — what the bands mean</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:2px">
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:0.76rem;">
+            <span style="min-width:90px;font-weight:700;color:#16A34A;background:#f0fdf4;border:1px solid #bbf7d0;padding:2px 8px;border-radius:5px;text-align:center;flex-shrink:0">Low 1–39</span>
+            <span style="color:var(--muted);line-height:1.5">Simple or well-established product type. Straightforward submission pathway with predictable timelines.</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:0.76rem;">
+            <span style="min-width:90px;font-weight:700;color:#D97706;background:#fffbeb;border:1px solid #fde68a;padding:2px 8px;border-radius:5px;text-align:center;flex-shrink:0">Moderate 40–69</span>
+            <span style="color:var(--muted);line-height:1.5">Standard complexity. Established pathway exists but meaningful evidence, manufacturing, or post-market gaps to address.</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:0.76rem;">
+            <span style="min-width:90px;font-weight:700;color:#DC2626;background:#fef2f2;border:1px solid #fecaca;padding:2px 8px;border-radius:5px;text-align:center;flex-shrink:0">High 70–100</span>
+            <span style="color:var(--muted);line-height:1.5">Novel, complex, or combination product. Significant regulatory investment required — early authority engagement strongly recommended.</span>
+          </div>
+        </div>
+        <div class="hcov-lbl" style="margin-top:14px">QA Readiness Score — what the bands mean</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:2px">
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:0.76rem;">
+            <span style="min-width:90px;font-weight:700;color:#16A34A;background:#f0fdf4;border:1px solid #bbf7d0;padding:2px 8px;border-radius:5px;text-align:center;flex-shrink:0">High 70–100</span>
+            <span style="color:var(--muted);line-height:1.5">Well-prepared QMS. Minor items to close before inspection or audit.</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:0.76rem;">
+            <span style="min-width:90px;font-weight:700;color:#D97706;background:#fffbeb;border:1px solid #fde68a;padding:2px 8px;border-radius:5px;text-align:center;flex-shrink:0">Moderate 40–69</span>
+            <span style="color:var(--muted);line-height:1.5">Core systems in place but key gaps remain. Address priority items before scheduling audit.</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:0.76rem;">
+            <span style="min-width:90px;font-weight:700;color:#DC2626;background:#fef2f2;border:1px solid #fecaca;padding:2px 8px;border-radius:5px;text-align:center;flex-shrink:0">Low 1–39</span>
+            <span style="color:var(--muted);line-height:1.5">QMS needs significant development. Not ready for inspection — foundational work required first.</span>
+          </div>
+        </div>
+      </div>
         <div class="hcov-lbl">Product categories</div>
         <div class="hcov-pills">
           <span class="hcov-pill">💊 Pharmaceutical</span>
@@ -1202,6 +1236,7 @@ function renderResults(d) {
       '<div class="rbv score">'+score+'<span style="font-size:1rem;opacity:.4">/100</span></div>'+
       '<div class="score-lvl">'+level+' '+scoreType+'</div>'+
       '<div class="sbar-wrap"><div class="sbar" style="width:'+score+'%"></div></div>'+
+      '<div class="sbar-labels"><span class="sbar-label">Low</span><span class="sbar-label">Moderate</span><span class="sbar-label">High</span></div>'+
     '</div>'+
     '<div class="rb s2">'+
       '<div class="rbl">Product / Situation</div>'+
