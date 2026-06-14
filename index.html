@@ -933,10 +933,22 @@ OUTPUT FORMAT (raw JSON only):
   "summary": "2–3 sentence plain-English assessment of QMS readiness and single most critical gap to address before inspection."
 }
 
-RULES: Be specific — exact CFR parts, ISO clause numbers, ICH guideline codes. Score 1–100. Low=1-39 (significant work needed), Moderate=40-69, High=70-100 (well-prepared). verify_links must be real working primary source URLs relevant to this product. Output JSON only when ready — never include any text outside the JSON.\`;
+RULES: Be specific — exact CFR parts, ISO clause numbers, ICH guideline codes. Score 1–100. Low=1-39 (significant work needed), Moderate=40-69, High=70-100 (well-prepared). verify_links must be real working primary source URLs relevant to this product. Output JSON only when ready — never include any text outside the JSON.`;
 const MODE_INTROS = {
-  ra: `Hi — I'm RegIQ's <strong>Regulatory Pathway</strong> module. Tell me about your product and I'll identify your regulatory pathway, submission type, lead authority, and risk profile.<br/><br/>Works for drugs, devices, biologics, combination products, SaMD, IVDs, and more — across FDA, EMA, Health Canada, TGA, PMDA, CDSCO, and MHRA.<br/><br/>Try: <em>"A prefilled auto-injector with a monoclonal antibody for psoriasis, targeting US and EU."</em>`,
-  qa: `Hi — I'm RegIQ's <strong>QA Readiness</strong> module. Tell me about your product and current QMS situation, and I'll score your readiness against the right quality standard — with gap analysis and top deficiency flags.<br/><br/>Works for pharmaceutical GMP, medical device QMS (ISO 13485 / 21 CFR 820), biologics, and combination products.<br/><br/>Try: <em>"We're a medical device startup preparing for our first FDA 510(k). We have some SOPs but no formal QMS yet."</em>`
+  ra: "Hey! I&rsquo;m <strong>RegIQ</strong> &mdash; your regulatory pathway assistant.<br/><br/>Tell me about your product and I&rsquo;ll identify your submission pathway, lead authority, and risk profile. Or just say hi first if you&rsquo;d like &mdash; I&rsquo;m here.",
+  qa: "Hey! I&rsquo;m <strong>RegIQ</strong> &mdash; your QA readiness assistant.<br/><br/>Tell me about your product and QMS situation and I&rsquo;ll score your readiness and flag your top gaps. Or just say hi first &mdash; I&rsquo;m here."
+};
+
+const GREETINGS = ['hi','hey','hello','hii','heey','heyy','howdy','yo','sup','good morning','good afternoon','good evening','morning','afternoon','evening','hi there','hey there','hello there','greetings','what\'s up','whats up'];
+
+function isGreeting(text) {
+  var t = text.toLowerCase().trim().replace(/[!.,?]+$/,'');
+  return GREETINGS.indexOf(t) !== -1 || (t.length < 20 && GREETINGS.some(function(g){ return t === g || t.startsWith(g+' ') || t.endsWith(' '+g); }));
+}
+
+const GREETING_RESPONSES = {
+  ra: "Hey! Great to have you here.<br/><br/>I&rsquo;m RegIQ&rsquo;s Regulatory Pathway module. Describe your product &mdash; what it does, how it works, which markets you&rsquo;re targeting &mdash; and I&rsquo;ll map out your full regulatory pathway and risk profile.<br/><br/>What are you working on?",
+  qa: "Hey! Good to meet you.<br/><br/>I&rsquo;m RegIQ&rsquo;s QA Readiness module. Tell me about your product and your current QMS situation &mdash; I&rsquo;ll score your readiness and flag the gaps that matter most before an inspection or audit.<br/><br/>What are you working on?"
 };
 
 function selectMode(m) {
@@ -951,7 +963,7 @@ function selectMode(m) {
 
 function initChat() {
   history=[]; done=false; qCount=0;
-  document.getElementById('chatArea').innerHTML = `<div class="msg ai"><div class="msg-av">Rq</div><div class="msg-bub">${MODE_INTROS[mode]}</div></div>`;
+  document.getElementById('chatArea').innerHTML = '<div class="msg ai"><div class="msg-av">Rq</div><div class="msg-bub">' + MODE_INTROS[mode] + '</div></div>';
   document.getElementById('resultsArea').classList.remove('visible');
   document.getElementById('resultGrid').innerHTML = '';
   document.getElementById('resetRow').classList.remove('visible');
@@ -963,7 +975,7 @@ function initChat() {
 }
 
 function renderChips() {
-  document.getElementById('chipsRow').innerHTML = EXAMPLES[mode].map(e => `<div class="chip" onclick="fillExample(this)">${e}</div>`).join('');
+  document.getElementById('chipsRow').innerHTML = EXAMPLES[mode].map(function(e) { return '<div class="chip" onclick="fillExample(this)">' + e + '</div>'; }).join('');
 }
 
 window.addEventListener('DOMContentLoaded', () => initChat());
@@ -979,7 +991,7 @@ function fillExample(el) {
 
 function addMsg(role, html) {
   const chat = document.getElementById('chatArea');
-  const w = document.createElement('div'); w.className=`msg ${role}`;
+  const w = document.createElement('div'); w.className="msg " + role;
   const av = document.createElement('div'); av.className='msg-av'; av.textContent=role==='user'?'You':'Rq';
   const b = document.createElement('div'); b.className='msg-bub'; b.innerHTML=html;
   w.appendChild(av); w.appendChild(b); chat.appendChild(w);
@@ -992,7 +1004,7 @@ function setSteps(n) {
   const labels={ra:['Describe your product','Answering questions','Analysis complete'],qa:['Describe your QMS','Answering questions','Assessment complete']};
   ['dot1','dot2','dot3'].forEach((id,i)=>{
     const d=document.getElementById(id);
-    d.className='sdot'+(i<n?' done':i===n?' active':'');
+    d.className="sdot"+(i<n?" done":i===n?" active":"");
   });
   document.getElementById('stepLbl').textContent=labels[mode][Math.min(n,2)];
 }
@@ -1006,6 +1018,17 @@ async function sendMessage() {
   if(!text||done) return;
   btn.disabled=true; ta.value=''; ta.style.height='auto';
   addMsg('user', text.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+
+  // Handle greetings locally — no API call needed
+  if(isGreeting(text)) {
+    setTimeout(function(){
+      addMsg('ai', GREETING_RESPONSES[mode]);
+      btn.disabled=false;
+      ta.focus();
+    }, 400);
+    return;
+  }
+
   history.push({role:'user',content:text});
   setSteps(qCount===0?0:1);
   const thinkEl=showThinking();
@@ -1034,60 +1057,84 @@ async function sendMessage() {
 }
 
 function renderResults(d) {
-  const area=document.getElementById('resultsArea');
-  const grid=document.getElementById('resultGrid');
-  const isRA=d.mode==='ra';
+  var area=document.getElementById('resultsArea');
+  var grid=document.getElementById('resultGrid');
+  var isRA=d.mode==='ra';
   document.getElementById('resultsTitle').textContent=isRA?'Your Regulatory Profile':'Your QA Readiness Profile';
-  const score=isRA?d.risk_score:d.readiness_score;
-  const level=isRA?d.risk_level:d.readiness_level;
-  const breakdown=isRA?d.risk_breakdown:d.readiness_breakdown;
-  const items=isRA?d.top_risks:d.top_gaps;
-  const itemLabel=isRA?'Top Regulatory Risks':'Top QMS Gaps';
-  const regs=isRA?d.key_regulations:d.key_standards;
-  const regsLabel=isRA?'Key Regulatory References':'Applicable Standards';
+  var score=isRA?d.risk_score:d.readiness_score;
+  var level=isRA?d.risk_level:d.readiness_level;
+  var breakdown=isRA?d.risk_breakdown:d.readiness_breakdown;
+  var items=isRA?d.top_risks:d.top_gaps;
+  var itemLabel=isRA?'Top Regulatory Risks':'Top QMS Gaps';
+  var regs=isRA?d.key_regulations:d.key_standards;
+  var regsLabel=isRA?'Key Regulatory References':'Applicable Standards';
 
-  const bdRows=Object.entries(breakdown).map(([l,v])=>`<div class="brow"><span class="blbl">${l}</span><div class="btrack"><div class="bfill" style="width:${v}%"></div></div><span class="bnum">${v}</span></div>`).join('');
-  const riskItems=items.map(r=>`<div class="ritem"><span class="rbadge ${r.level}">${r.level}</span><span>${r.text}</span></div>`).join('');
-  const regTags=regs.map(r=>`<span class="rtag">${r}</span>`).join('');
-  const verifyLinks=(d.verify_links||[]).map(v=>`<a href="${v.url}" target="_blank" rel="noopener" class="verify-link"><span class="vl-icon">${v.icon}</span><div class="vl-text"><span class="vl-name">${v.name}</span><span class="vl-sub">${v.sub}</span></div><span class="vl-arr">↗</span></a>`).join('');
+  var bdRows=Object.entries(breakdown).map(function(e){
+    var l=e[0],v=e[1];
+    return '<div class="brow"><span class="blbl">'+l+'</span><div class="btrack"><div class="bfill" style="width:'+v+'%"></div></div><span class="bnum">'+v+'</span></div>';
+  }).join('');
 
-  const raBlocks=isRA?`
-    <div class="rb"><div class="rbl">FDA Pathway</div><div class="rbv">${d.fda_pathway}</div><div style="font-size:0.71rem;color:var(--soft);margin-top:6px">${(d.submission_timeline||'').split('/')[0]?.trim()}</div></div>
-    <div class="rb"><div class="rbl">EU Pathway</div><div class="rbv">${d.eu_pathway}</div></div>
-    <div class="rb"><div class="rbl">Other Markets</div><div class="rbv" style="font-size:0.79rem">${d.other_markets}</div></div>`:'';
+  var riskItems=items.map(function(r){
+    return '<div class="ritem"><span class="rbadge '+r.level+'">'+r.level+'</span><span>'+r.text+'</span></div>';
+  }).join('');
 
-  const qaBlocks=!isRA?`
-    <div class="rb s2"><div class="rbl">Applicable QMS Standard</div><div class="rbv">${d.applicable_standard}</div></div>
-    <div class="rb"><div class="rbl">GxP Requirements</div><div class="rbv" style="font-size:0.79rem">${d.gxp_requirements}</div></div>`:'';
+  var regTags=regs.map(function(r){
+    return '<span class="rtag">'+r+'</span>';
+  }).join('');
 
-  grid.innerHTML=`
-    <div class="rb accent">
-      <div class="rbl">${isRA?'Regulatory Risk Score':'QA Readiness Score'}</div>
-      <div class="rbv score">${score}<span style="font-size:1rem;opacity:.4">/100</span></div>
-      <div class="score-lvl">${level} ${isRA?'Risk':'Readiness'}</div>
-      <div class="sbar-wrap"><div class="sbar" style="width:${score}%"></div></div>
-    </div>
-    <div class="rb s2">
-      <div class="rbl">Product / Situation</div>
-      <div class="rbv" style="font-weight:600">${d.product_type}</div>
-      <div class="tagrow">
-        <span class="rtag p">${d.industry||d.applicable_standard?.split('+')[0]?.trim()}</span>
-        ${isRA?`<span class="rtag">${d.fda_center}</span>`:''}
-      </div>
-    </div>
-    ${raBlocks}${qaBlocks}
-    <div class="rb s3"><div class="rbl">${isRA?'Risk':'Readiness'} Breakdown</div><div class="bdwn">${bdRows}</div></div>
-    <div class="rb s3"><div class="rbl">Strategic Summary</div><div style="font-size:0.83rem;line-height:1.78;color:var(--muted)">${d.summary}</div></div>
-    <div class="rb s3"><div class="rbl">${itemLabel}</div><div class="rlist">${riskItems}</div></div>
-    <div class="rb s3"><div class="rbl">${regsLabel}</div><div class="tagrow">${regTags}</div></div>
-    <div class="rb s3"><div class="rbl">Verify Primary Sources</div><div class="verify-grid">${verifyLinks}</div></div>
-    <div class="disc"><span style="flex-shrink:0;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span><strong>Educational use only.</strong> This ${isRA?'regulatory pathway analysis':'QA readiness assessment'} is grounded in publicly available guidance but does not constitute ${isRA?'regulatory':'quality'} advice. Always verify against current primary sources and consult a qualified ${isRA?'Regulatory Affairs':'Quality Assurance'} professional. References current as of 2026.</span></div>`;
+  var verifyLinks=(d.verify_links||[]).map(function(v){
+    return '<a href="'+v.url+'" target="_blank" rel="noopener" class="verify-link"><span class="vl-icon">'+v.icon+'</span><div class="vl-text"><span class="vl-name">'+v.name+'</span><span class="vl-sub">'+v.sub+'</span></div><span class="vl-arr">&#x2197;</span></a>';
+  }).join('');
+
+  var raBlocks=isRA ? (
+    '<div class="rb"><div class="rbl">FDA Pathway</div><div class="rbv">'+d.fda_pathway+'</div><div style="font-size:0.71rem;color:var(--soft);margin-top:6px">'+((d.submission_timeline||'').split('/')[0]||'').trim()+'</div></div>'+
+    '<div class="rb"><div class="rbl">EU Pathway</div><div class="rbv">'+d.eu_pathway+'</div></div>'+
+    '<div class="rb"><div class="rbl">Other Markets</div><div class="rbv" style="font-size:0.79rem">'+d.other_markets+'</div></div>'
+  ) : '';
+
+  var qaBlocks=!isRA ? (
+    '<div class="rb s2"><div class="rbl">Applicable QMS Standard</div><div class="rbv">'+d.applicable_standard+'</div></div>'+
+    '<div class="rb"><div class="rbl">GxP Requirements</div><div class="rbv" style="font-size:0.79rem">'+d.gxp_requirements+'</div></div>'
+  ) : '';
+
+  var scoreLabel=isRA?'Regulatory Risk Score':'QA Readiness Score';
+  var scoreType=isRA?'Risk':'Readiness';
+  var fdaCenterTag=isRA?('<span class="rtag">'+d.fda_center+'</span>'):'';
+  var industryTag=isRA?d.industry:((d.applicable_standard||'').split('+')[0]||'').trim();
+  var summaryType=isRA?'regulatory pathway analysis':'QA readiness assessment';
+  var adviceType=isRA?'regulatory':'quality';
+  var profType=isRA?'Regulatory Affairs':'Quality Assurance';
+
+  var discSvg='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+  grid.innerHTML=
+    '<div class="rb accent">'+
+      '<div class="rbl">'+scoreLabel+'</div>'+
+      '<div class="rbv score">'+score+'<span style="font-size:1rem;opacity:.4">/100</span></div>'+
+      '<div class="score-lvl">'+level+' '+scoreType+'</div>'+
+      '<div class="sbar-wrap"><div class="sbar" style="width:'+score+'%"></div></div>'+
+    '</div>'+
+    '<div class="rb s2">'+
+      '<div class="rbl">Product / Situation</div>'+
+      '<div class="rbv" style="font-weight:600">'+d.product_type+'</div>'+
+      '<div class="tagrow">'+
+        '<span class="rtag p">'+industryTag+'</span>'+
+        fdaCenterTag+
+      '</div>'+
+    '</div>'+
+    raBlocks+qaBlocks+
+    '<div class="rb s3"><div class="rbl">'+scoreType+' Breakdown</div><div class="bdwn">'+bdRows+'</div></div>'+
+    '<div class="rb s3"><div class="rbl">Strategic Summary</div><div style="font-size:0.83rem;line-height:1.78;color:var(--muted)">'+d.summary+'</div></div>'+
+    '<div class="rb s3"><div class="rbl">'+itemLabel+'</div><div class="rlist">'+riskItems+'</div></div>'+
+    '<div class="rb s3"><div class="rbl">'+regsLabel+'</div><div class="tagrow">'+regTags+'</div></div>'+
+    '<div class="rb s3"><div class="rbl">Verify Primary Sources</div><div class="verify-grid">'+verifyLinks+'</div></div>'+
+    '<div class="disc"><span style="flex-shrink:0;margin-top:1px">'+discSvg+'</span><span><strong>Educational use only.</strong> This '+summaryType+' is grounded in publicly available guidance but does not constitute '+adviceType+' advice. Always verify against current primary sources and consult a qualified '+profType+' professional. References current as of 2026.</span></div>';
 
   area.classList.add('visible');
   document.getElementById('resetRow').classList.add('visible');
-  const subj=encodeURIComponent(`RegIQ Feedback — ${d.product_type}`);
-  const body=encodeURIComponent(`Module: ${isRA?'RA Pathway':'QA Readiness'}\nProduct: ${d.product_type}\nScore: ${score}/100\n\nFeedback:\n`);
-  document.getElementById('feedbackBtn').href=`mailto:ygandhi.corpdesk@outlook.com?subject=${subj}&body=${body}`;
+  var subj=encodeURIComponent('RegIQ Feedback -- '+d.product_type);
+  var body=encodeURIComponent('Module: '+(isRA?'RA Pathway':'QA Readiness')+'\nProduct: '+d.product_type+'\nScore: '+score+'/100\n\nFeedback:\n');
+  document.getElementById('feedbackBtn').href='mailto:ygandhi.corpdesk@outlook.com?subject='+subj+'&body='+body;
   area.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
