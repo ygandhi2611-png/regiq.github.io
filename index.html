@@ -516,10 +516,10 @@
     }
     .ft-inner { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
     .ft-logo { font-family: var(--serif); font-size: 0.95rem; font-weight: 700; color: #fff; }
-    .ft-sub { font-size: 0.68rem; color: rgba(255,255,255,0.3); margin-top: 2px; }
-    .ft-link { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.15s; }
+    .ft-sub { font-size: 0.68rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
+    .ft-link { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.15s; }
     .ft-link:hover { color: #fff; }
-    .ft-disc { max-width: 1080px; margin: 1rem auto 0; font-size: 0.65rem; color: rgba(255,255,255,0.2); line-height: 1.6; }
+    .ft-disc { max-width: 1080px; margin: 1rem auto 0; font-size: 0.65rem; color: rgba(255,255,255,0.45); line-height: 1.6; }
 
     /* ── RESPONSIVE ── */
     @media(max-width:900px){
@@ -732,7 +732,11 @@
         <div class="print-logo-sub">Regulatory &amp; Quality Intelligence &nbsp;·&nbsp; regiq.vercel.app &nbsp;·&nbsp; Generated <span id="printDate"></span></div>
       </div>
       <div class="results-hdr">
-        <div class="results-title" id="resultsTitle">Your Regulatory Profile</div>
+        <div>
+          <div class="results-title" id="resultsTitle">Your Regulatory Profile</div>
+          <div style="font-size:0.68rem;color:var(--soft);margin-top:3px">Regulatory references current as of June 2026 · Includes FDA QMSR update (Feb 2, 2026) · Always verify against primary sources before filing</div>
+        </div>
+        </div>
         <div class="res-actions">
           <a id="feedbackBtn" href="mailto:ygandhi.corpdesk@outlook.com?subject=RegIQ%20Feedback" class="res-btn">✉ Feedback</a>
           <button class="res-btn" onclick="printReport()">⎙ Save PDF</button>
@@ -986,6 +990,14 @@ const QA_SYSTEM = `You are RegIQ's QA Readiness module — an expert AI quality 
 YOUR CORE BEHAVIOUR:
 You think like a senior QA consultant. Extract everything the user already told you. NEVER ask them to repeat information already given. Only ask questions that would change your readiness assessment. If you have enough info — go straight to JSON output.
 
+CRITICAL REGULATORY UPDATE — EFFECTIVE FEBRUARY 2, 2026:
+FDA's Quality Management System Regulation (QMSR) is now in effect. 21 CFR Part 820 has been amended to incorporate by reference ISO 13485:2016 as the new CGMP standard for medical devices. Key implications:
+- The old QSR (21 CFR Part 820 pre-2026) is replaced by QMSR which harmonizes with ISO 13485:2016
+- FDA now inspects using Compliance Program 7382.850 — the old 7382.845 and 7383.001 are retired
+- Companies must now comply with ISO 13485:2016 clauses as the FDA CGMP framework
+- For US medical device manufacturers: ISO 13485:2016 certification is now directly aligned with FDA QSR requirements
+- Always reference "21 CFR Part 820 (QMSR) incorporating ISO 13485:2016" for device QMS gaps
+
 QUESTION RULES:
 - Maximum 1-2 questions per turn, only if truly assessment-critical
 - Never ask about something already mentioned
@@ -1002,21 +1014,21 @@ OUTPUT FORMAT (raw JSON only — output this when ready):
   "ready": true,
   "mode": "qa",
   "product_type": "Specific product and market",
-  "applicable_standard": "e.g. ISO 13485:2016 + 21 CFR Part 820",
-  "gxp_requirements": "e.g. GMP (21 CFR 210/211), Design Controls (21 CFR 820.30)",
+  "applicable_standard": "e.g. 21 CFR Part 820 (QMSR) incorporating ISO 13485:2016 — effective Feb 2, 2026",
+  "gxp_requirements": "e.g. GMP (21 CFR Part 820 QMSR / ISO 13485:2016), Design Controls (ISO 13485:2016 Clause 7.3)",
   "readiness_score": 54,
   "readiness_level": "Moderate",
   "readiness_breakdown": {"Document Control": 70, "CAPA System": 45, "Supplier Controls": 60, "Design Controls": 55, "Training Records": 65, "Audit Readiness": 50},
   "top_gaps": [
-    {"level": "high", "text": "Specific gap with exact regulation cited"},
+    {"level": "high", "text": "Specific gap with exact regulation cited — reference QMSR/ISO 13485:2016 clause for device gaps"},
     {"level": "med", "text": "Specific gap with standard reference"},
     {"level": "low", "text": "Specific gap with guideline cited"}
   ],
-  "key_standards": ["ISO 13485:2016", "21 CFR Part 820", "ICH Q10", "EU MDR Annex IX"],
+  "key_standards": ["21 CFR Part 820 (QMSR — effective Feb 2026)", "ISO 13485:2016", "ICH Q10", "EU MDR Annex IX"],
   "verify_links": [
-    {"name": "21 CFR Part 820 (QSR)", "url": "https://www.ecfr.gov/current/title-21/chapter-I/subchapter-H/part-820", "icon": "🇺🇸", "sub": "FDA Quality System Regulation"},
-    {"name": "ISO 13485 Overview", "url": "https://www.iso.org/standard/59752.html", "icon": "🌐", "sub": "Medical device QMS standard"},
-    {"name": "ICH Q10 Pharmaceutical QMS", "url": "https://www.ich.org/page/quality-guidelines", "icon": "💊", "sub": "ICH pharmaceutical quality system"},
+    {"name": "FDA QMSR (21 CFR Part 820)", "url": "https://www.fda.gov/medical-devices/quality-management-system-regulation-qmsr", "icon": "🇺🇸", "sub": "QMSR — incorporates ISO 13485:2016, effective Feb 2, 2026"},
+    {"name": "ISO 13485:2016", "url": "https://www.iso.org/standard/59752.html", "icon": "🌐", "sub": "Medical device QMS — now incorporated into FDA QMSR"},
+    {"name": "FDA Inspection CP 7382.850", "url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/compliance-program-guidance-manual/inspection-medical-device-manufacturers", "icon": "🇺🇸", "sub": "New FDA inspection compliance program — replaces 7382.845"},
     {"name": "FDA 483 Observations", "url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/inspection-references/fda-form-483-frequently-asked-questions", "icon": "📋", "sub": "Common inspection findings"}
   ],
   "summary": "2-3 sentence plain-English assessment and single most critical gap to address before inspection."
