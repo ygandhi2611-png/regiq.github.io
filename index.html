@@ -1101,37 +1101,22 @@ async function sendMessage() {
     }
     let parsed=null;
     try {
-      let clean = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-      const start = clean.indexOf('{');
-      const end = clean.lastIndexOf('}');
+      let clean = raw.trim();
       console.log('Raw response length:', raw.length);
-      console.log('Raw first 200 chars:', raw.substring(0,200));
-      if(start !== -1 && end !== -1) {
-        let jsonStr = clean.substring(start, end+1);
-        // Fix special characters
-        jsonStr = jsonStr
-          .replace(/[\u2018\u2019]/g, "\\'")
-          .replace(/[\u201C\u201D]/g, '\\"')
-          .replace(/\u2014/g, '-')
-          .replace(/\u2013/g, '-')
-          .replace(/\u2022/g, '*');
-        // Fix unescaped newlines inside JSON string values
-        // Replace literal newlines that are inside JSON strings
-        jsonStr = jsonStr.replace(/"([^"]*)"/g, function(match) {
-          return match.replace(/\n/g, '\\n').replace(/\r/g, '').replace(/\t/g, ' ');
-        });
-        const candidate = JSON.parse(jsonStr);
-        console.log('Parsed mode:', candidate.mode, 'fda_pathway:', candidate.fda_pathway, 'risk_score:', candidate.risk_score);
+      console.log('Raw first 100 chars:', raw.substring(0,100));
+      // Server already cleaned the JSON, just parse directly
+      if(clean.startsWith('{')) {
+        const candidate = JSON.parse(clean);
         const isRA = candidate.mode === 'ra'
-          && candidate.fda_pathway && candidate.fda_pathway !== 'null'
-          && candidate.risk_score && candidate.risk_score > 0
+          && candidate.fda_pathway
+          && candidate.risk_score > 0
           && candidate.risk_level
           && candidate.product_type
           && candidate.risk_breakdown && Object.keys(candidate.risk_breakdown).length > 0
           && candidate.top_risks && candidate.top_risks.length > 0;
         const isQA = candidate.mode === 'qa'
-          && candidate.applicable_standard && candidate.applicable_standard !== 'null'
-          && candidate.readiness_score && candidate.readiness_score > 0
+          && candidate.applicable_standard
+          && candidate.readiness_score > 0
           && candidate.readiness_level
           && candidate.product_type
           && candidate.readiness_breakdown && Object.keys(candidate.readiness_breakdown).length > 0
