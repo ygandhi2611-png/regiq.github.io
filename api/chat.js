@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
     const rawText = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '';
 
     // Try to extract and validate JSON server-side
-    let cleanText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+    let cleanText = rawText.replace(/`{1,3}json\s*/gi, '').replace(/`{1,3}\s*/g, '').trim();
     const jsonStart = cleanText.indexOf('{');
     const jsonEnd = cleanText.lastIndexOf('}');
 
