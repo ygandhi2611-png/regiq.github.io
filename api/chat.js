@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-        max_tokens: 2000,
+        max_tokens: 4000,
         system: req.body.system,
         messages: req.body.messages
       })
@@ -29,6 +29,14 @@ module.exports = async function handler(req, res) {
 
     const data = await response.json();
     const rawText = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '';
+    const stopReason = data.stop_reason || '';
+
+    // If response was truncated, return as conversational message
+    if (stopReason === 'max_tokens') {
+      return res.status(200).json({
+        content: [{ type: 'text', text: 'The analysis was too long to complete in one response. Please try a more specific product description.' }]
+      });
+    }
 
     // Try to extract and validate JSON server-side
     let cleanText = rawText.replace(/`{1,3}json\s*/gi, '').replace(/`{1,3}\s*/g, '').trim();
