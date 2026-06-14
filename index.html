@@ -1040,6 +1040,13 @@ async function sendMessage() {
     const data=await res.json();
     const raw=data.content?.[0]?.text||'';
     thinkEl.remove();
+
+    // Handle rate limit gracefully
+    if(raw === '__RATE_LIMIT__') {
+      addMsg('ai', 'You\'ve hit the free tier limit. Please wait about 60 seconds and try again &mdash; the limit resets automatically.');
+      btn.disabled=false; ta.focus();
+      return;
+    }
     let parsed=null;
     try {
       // Strip markdown code fences if present
