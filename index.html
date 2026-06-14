@@ -1122,7 +1122,19 @@ function setSteps(n) {
   document.getElementById('stepLbl').textContent=labels[mode][Math.min(n,2)];
 }
 
-function fmt(txt) { return txt.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'<br/><br/>').replace(/\n/g,'<br/>'); }
+function fmt(txt) {
+  return txt
+    .replace(/^### (.*?)$/gm, '<strong style="font-size:0.88rem;color:var(--text)">$1</strong>')
+    .replace(/^## (.*?)$/gm, '<strong style="font-size:0.9rem;color:var(--text)">$1</strong>')
+    .replace(/^# (.*?)$/gm, '<strong style="font-size:0.95rem;color:var(--text)">$1</strong>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid var(--border);margin:8px 0">')
+    .replace(/^- (.*?)$/gm, '<div style="display:flex;gap:6px;margin:2px 0"><span style="color:var(--soft);flex-shrink:0">→</span><span>$1</span></div>')
+    .replace(/^\d+\. (.*?)$/gm, '<div style="display:flex;gap:6px;margin:2px 0"><span style="color:var(--accent);font-weight:600;flex-shrink:0">$&</span></div>')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>');
+}
 
 async function sendMessage() {
   const ta=document.getElementById('userInput');
