@@ -1061,7 +1061,7 @@ async function sendMessage() {
   setSteps(qCount===0?0:1);
   const thinkEl=showThinking();
   try {
-    const res=await fetch('/.netlify/functions/chat',{
+    const res=await fetch('/api/chat',{
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1400,system:mode==='ra'?RA_SYSTEM:QA_SYSTEM,messages:history})
     });
