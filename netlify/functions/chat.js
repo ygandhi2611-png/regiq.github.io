@@ -8,10 +8,9 @@ exports.handler = async function(event) {
     const messages = body.messages || [];
     const systemPrompt = body.system || '';
 
-    // Convert Anthropic format to Gemini format
+    // Convert to Gemini format
     const contents = [];
 
-    // Add conversation history
     messages.forEach(function(msg) {
       contents.push({
         role: msg.role === 'assistant' ? 'model' : 'user',
@@ -41,13 +40,28 @@ exports.handler = async function(event) {
 
     const data = await response.json();
 
-    // Convert Gemini response back to Anthropic format so frontend works unchanged
-    const text = data.candidates &&
-                 data.candidates[0] &&
-                 data.candidates[0].content &&
-                 data.candidates[0].content.parts &&
-                 data.candidates[0].content.parts[0] ?
-                 data.candidates[0].content.parts[0].text : '';
+    // Log full response for debugging
+    console.log('Gemini raw response:', JSON.stringify(data));
+
+    // Extract text safely from Gemini response
+    let text = '';
+    if (data.candidates && data.candidates.length > 0) {
+      const candidate = data.candidates[0];
+      if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+        text = candidate.content.parts[0].text || '';
+      }
+    }
+
+    // If still empty check for errors
+    if (!text && data.error) {
+      console.log('Gemini error:', JSON.stringify(data.error));
+      text = 'API error: ' + data.error.message;
+    }
+
+    if (!text && data.promptFeedback) {
+      console.log('Prompt feedback:', JSON.stringify(data.promptFeedback));
+      text = 'Request blocked: ' + JSON.stringify(data.promptFeedback);
+    }
 
     return {
       statusCode: 200,
@@ -61,6 +75,7 @@ exports.handler = async function(event) {
     };
 
   } catch (err) {
+    console.log('Function error:', err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message })
