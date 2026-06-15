@@ -1362,8 +1362,9 @@ async function sendMessage() {
       try {
         renderResults(parsed);
       } catch(renderErr) {
-        console.error('Render error:', renderErr);
-        addMsg('ai', 'The analysis completed successfully but there was an error displaying the results. Please try again or use a more specific product description.');
+        console.error('Render error:', renderErr.message, renderErr.stack);
+        console.log('Parsed data:', JSON.stringify(parsed).substring(0, 500));
+        addMsg('ai', 'Render error: ' + renderErr.message + ' — check console for details.');
         done=false; btn.disabled=false;
       }
       setSteps(2);
