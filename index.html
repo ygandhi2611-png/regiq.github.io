@@ -255,11 +255,11 @@
     .mode-ind.qa { background: var(--success-bg); border-color: var(--success-b); color: var(--success); }
 
     /* Chat */
-    .chat-area { padding: 22px; min-height: 200px; display: flex; flex-direction: column; gap: 14px; }
+    .chat-area { padding: 22px; min-height: 200px; display: flex; flex-direction: column; gap: 14px; overflow-x: hidden; }
 
-    .msg { display: flex; gap: 10px; max-width: 88%; animation: msgIn 0.24s ease; min-width: 0; overflow: hidden; }
+    .msg { display: flex; gap: 10px; max-width: 85%; animation: msgIn 0.24s ease; min-width: 0; }
     @keyframes msgIn { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
-    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; max-width: 72%; }
 
     .msg-av {
       width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
@@ -273,7 +273,8 @@
       background: var(--bg); border: 1px solid var(--border);
       border-radius: 11px; padding: 11px 15px;
       font-size: 0.85rem; line-height: 1.7; color: var(--text);
-      word-wrap: break-word; overflow-wrap: break-word; min-width: 0;
+      word-wrap: break-word; overflow-wrap: break-word;
+      min-width: 0; max-width: 100%;
     }
     .msg.user .msg-bub { background: var(--accent); border-color: var(--accent); color: #fff; }
     .msg-bub strong { color: var(--accent); font-weight: 600; }
@@ -592,7 +593,7 @@
 
       /* Chat */
       .chat-area { padding:14px; gap:12px; min-height:160px; }
-      .msg { max-width:94%; gap:8px; }
+      .msg { max-width:94%; gap:8px; min-width:0; }
       .msg-av { width:26px; height:26px; font-size:0.58rem; border-radius:6px; }
       .msg-bub { padding:10px 13px; font-size:0.82rem; border-radius:10px; }
 
@@ -1241,13 +1242,13 @@ function setSteps(n) {
 
 function fmt(txt) {
   return txt
-    .replace(/^### (.*?)$/gm, '<strong style="font-size:0.84rem;color:var(--text);display:block;margin-top:8px">$1</strong>')
-    .replace(/^## (.*?)$/gm, '<strong style="font-size:0.84rem;color:var(--text);display:block;margin-top:8px">$1</strong>')
-    .replace(/^# (.*?)$/gm, '<strong style="font-size:0.86rem;color:var(--text);display:block;margin-top:8px">$1</strong>')
+    .replace(/^### (.*?)$/gm, '<strong>$1</strong>')
+    .replace(/^## (.*?)$/gm, '<strong>$1</strong>')
+    .replace(/^# (.*?)$/gm, '<strong>$1</strong>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid var(--border);margin:8px 0">')
-    .replace(/^- (.*?)$/gm, '<div style="display:flex;gap:6px;margin:2px 0"><span style="color:var(--soft);flex-shrink:0">→</span><span>$1</span></div>')
+    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid rgba(0,0,0,0.1);margin:8px 0">')
+    .replace(/^- (.*?)$/gm, '<div style="display:flex;gap:6px;margin:2px 0"><span style="flex-shrink:0;opacity:0.5">→</span><span style="word-break:break-word">$1</span></div>')
     .replace(/\n\n/g, '<br/>')
     .replace(/\n/g, '<br/>');
 }
